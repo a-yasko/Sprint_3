@@ -1,60 +1,22 @@
-import io.qameta.allure.Step;
+package tests;
+
+import client.BaseHttpClient;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import model.Courier;
+import model.CourierCredentials;
 import org.junit.Before;
 import org.junit.Test;
 import org.apache.commons.lang3.RandomStringUtils;
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.equalTo;
+
+import static steps.Steps.*;
 
 public class CreateCourierTest {
-  static class Courier {
-    public final String login;
-    public final String password;
-    public final String firstName;
-
-
-    Courier(String login, String password, String firstName) {
-      this.login = login;
-      this.password = password;
-      this.firstName = firstName;
-    }
-  }
 
   @Before
   public void setUp() {
-    RestAssured.baseURI = "http://qa-scooter.praktikum-services.ru";
-  }
-
-  @Step("Send post request and get response '{url}'")
-  public Response sendPostRequestAndGetResponse(Object body, String url) {
-    Response response =
-            given()
-                    .header("Content-type", "application/json")
-                    .and()
-                    .body(body)
-                    .when()
-                    .post(url);
-
-    return response;
-  }
-
-  @Step("Delete courier with id: {id}")
-  public void deleteCourier(Object id) {
-    Response response = given().delete("/api/v1/courier/" + id);
-    checkStatusCode(response, 200);
-    checkResponseBody(response, "ok", true);
-  }
-
-  @Step("Check status code")
-  public void checkStatusCode(Response response, Integer statusCode) {
-    response.then().assertThat().statusCode(statusCode);
-  }
-
-  @Step("Check response body")
-  public void checkResponseBody(Response response, String key, Object value) {
-    response.then().assertThat().body(key, equalTo(value));
+    RestAssured.baseURI = BaseHttpClient.getBASE_URL();
   }
 
   @Test
@@ -67,7 +29,7 @@ public class CreateCourierTest {
     Courier courier = new Courier(login, password, firstName);
     sendPostRequestAndGetResponse(courier, "/api/v1/courier");
 
-    LoginCourierTest.CourierCredentials courierCredentials = new LoginCourierTest.CourierCredentials(login, password);
+    CourierCredentials courierCredentials = new CourierCredentials(login, password);
     Response logIn = sendPostRequestAndGetResponse(courierCredentials, "/api/v1/courier/login");
 
     Integer id = logIn.path("id");
@@ -93,7 +55,7 @@ public class CreateCourierTest {
     Response response = sendPostRequestAndGetResponse(courier, "/api/v1/courier");
     checkStatusCode(response, 201);
 
-    LoginCourierTest.CourierCredentials courierCredentials = new LoginCourierTest.CourierCredentials(login, password);
+    CourierCredentials courierCredentials = new CourierCredentials(login, password);
     Response logIn = sendPostRequestAndGetResponse(courierCredentials, "/api/v1/courier/login");
 
     Integer id = logIn.path("id");
@@ -112,7 +74,7 @@ public class CreateCourierTest {
     checkStatusCode(response, 201);
     checkResponseBody(response, "ok", true);
 
-    LoginCourierTest.CourierCredentials courierCredentials = new LoginCourierTest.CourierCredentials(login, password);
+    CourierCredentials courierCredentials = new CourierCredentials(login, password);
     Response logIn = sendPostRequestAndGetResponse(courierCredentials, "/api/v1/courier/login");
 
     Integer id = logIn.path("id");
